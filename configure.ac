@@ -850,6 +850,36 @@ if test "${pgsql_ssl}" = "yes"; then
     AC_DEFINE([HAVE_PGSQL_SSL], [1], [PostgreSQL was built with OpenSSL support])
 fi
 
+# optional libubus support
+AC_ARG_ENABLE(ubus, [AS_HELP_STRING([--enable-ubus],
+              [enable libubus support [default=no]])],
+              enable_ubus=$enableval, enable_ubus=no)
+
+DISTCHECK_UBUS_CONFIGURE_FLAG=
+if test "$enable_ubus" != "no" ; then
+	DISTCHECK_UBUS_CONFIGURE_FLAG="--enable-ubus"
+
+	UBUS_LIBS="$UBUS_LIBS -lubus"
+
+	AC_SUBST(DISTCHECK_UBUS_CONFIGURE_FLAG)
+	AC_SUBST(UBUS_LIBS)
+
+	LIBS_SAVED="$LIBS"
+	LIBS="$UBUS_LIBS $LIBS"
+
+	AC_CHECK_HEADERS([libubus.h],,
+	AC_MSG_ERROR([Missing required header file (libubus.h) from ubus development package]))
+
+	LIBS=$LIBS_SAVED
+
+	# Note that ubus is present in the config.h file
+	AC_DEFINE([HAVE_UBUS], [1], [Ubus is present])
+fi
+
+# ... and at the shell level, so Makefile.am can take action depending on this.
+AM_CONDITIONAL(HAVE_UBUS, test "$enable_ubus" != "no")
+
+
 # Check for log4cplus
 DISTCHECK_LOG4CPLUS_CONFIGURE_FLAG=
 log4cplus_path="yes"
@@ -1537,6 +1567,7 @@ AC_CONFIG_FILES([src/hooks/dhcp/run_script/tests/run_script_test.sh],
 AC_CONFIG_FILES([src/hooks/dhcp/stat_cmds/Makefile])
 AC_CONFIG_FILES([src/hooks/dhcp/stat_cmds/libloadtests/Makefile])
 AC_CONFIG_FILES([src/hooks/dhcp/stat_cmds/tests/Makefile])
+AC_CONFIG_FILES([src/hooks/dhcp/ubus/Makefile])
 AC_CONFIG_FILES([src/hooks/dhcp/user_chk/Makefile])
 AC_CONFIG_FILES([src/hooks/dhcp/user_chk/tests/Makefile])
 AC_CONFIG_FILES([src/hooks/dhcp/user_chk/tests/test_data_files_config.h])
@@ -1628,6 +1659,7 @@ AC_CONFIG_FILES([src/lib/testutils/dhcp_test_lib.sh],
                 [chmod +x src/lib/testutils/dhcp_test_lib.sh])
 AC_CONFIG_FILES([src/lib/testutils/xml_reporting_test_lib.sh],
                 [chmod +x src/lib/testutils/xml_reporting_test_lib.sh])
+AC_CONFIG_FILES([src/lib/ubus/Makefile])
 AC_CONFIG_FILES([src/lib/util/Makefile])
 AC_CONFIG_FILES([src/lib/util/io/Makefile])
 AC_CONFIG_FILES([src/lib/util/python/Makefile])
@@ -2044,6 +2076,15 @@ cat >> config.report << END
 GSS-API support:
   GSSAPI_CFLAGS:         ${GSSAPI_CFLAGS}
   GSSAPI_LIBS:           ${GSSAPI_LIBS}
+END
+fi
+
+if test "$enable_ubus" != "no"; then
+cat >> config.report << END
+
+Ubus:
+  UBUS_INCLUDES: ${UBUS_INCLUDES}
+  UBUS_LIBS:	${UBUS_LIBS}
 END
 fi
 

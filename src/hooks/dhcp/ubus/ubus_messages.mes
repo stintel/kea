@@ -1,0 +1,5 @@
+% UBUS_LOAD Ubus hooks library has been loaded
+This info message indicates that the Ubus hooks library has been loaded.
+
+% UBUS_UNLOAD Ubus hooks library has been unloaded
+This info message indicates that the Ubus hooks library has been unloaded.

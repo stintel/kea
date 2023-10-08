@@ -9,3 +9,7 @@ SUBDIRS += pgsql_cb
 endif
 
 SUBDIRS += run_script stat_cmds user_chk
+
+if HAVE_UBUS
+SUBDIRS += ubus
+endif

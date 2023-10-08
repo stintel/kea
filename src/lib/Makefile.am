@@ -15,4 +15,8 @@ if HAVE_NETCONF
 SUBDIRS += yang
 endif
 
+if HAVE_UBUS
+SUBDIRS += ubus
+endif
+
 SUBDIRS += asiodns dhcp_ddns eval process dhcpsrv d2srv
